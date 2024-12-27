@@ -4,6 +4,7 @@ project(opengl3d)
 
 find_package(glfw3 REQUIRED)
 
+set(CMAKE_CXX_STANDARD 11)
 add_executable(opengl3d main.cpp glad.c)
 target_link_libraries(opengl3d
     glfw
