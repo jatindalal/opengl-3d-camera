@@ -5,7 +5,10 @@ project(opengl3d)
 find_package(glfw3 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
-add_executable(opengl3d main.cpp glad.c)
+add_executable(opengl3d
+    main.cpp glad.c Shader.cpp VertexBuffer.cpp ElementBuffer.cpp
+    VertexArray.cpp
+)
 target_link_libraries(opengl3d
     glfw
     "-framework OpenGL")

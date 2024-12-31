@@ -1,28 +1,44 @@
-#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-const unsigned int WIDTH = 640;
-const unsigned int HEIGHT = 480;
+#include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "ElementBuffer.h"
 
-const char* vertex_shader_source = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
+#include <iostream>
 
-const char* fragment_shader_source = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0);\n"
-    "}\0";
+// Vertices coordinates
+GLfloat vertices[] =
+{
+	-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
+	0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
+	0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
+	-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
+	0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
+	0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
+};
+
+// Indices for vertices order
+GLuint indices[] =
+{
+	0, 3, 5, // Lower left triangle
+	3, 2, 4, // Lower right triangle
+	5, 4, 1 // Upper triangle
+};
+
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
 
 int main()
 {
     if (!glfwInit()) {
-        std::cout << "Failed to initialize glfw\n";
+        std::cout << "error initializing glfw\n";
         return -1;
     }
 
@@ -34,93 +50,56 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "opengl 3d", nullptr,
-                                          nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Opengl 3d",
+                                          nullptr, nullptr);
     if (!window) {
-        std::cout << "failed to initialize glfw window\n";
+        std::cout << "failed to create glfw window" << std::endl;
         glfwTerminate();
         return -1;
     }
 
     glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize glad!\n";
+        std::cout << "failed to initialize glad" << std::endl;
         return -1;
     }
 
-    float vertices[] = 
-    {
-        -0.5f, -0.5f * float(sqrt(3.0f)) / 3, 0.0f,     // lower left corner
-        +0.5f, -0.5f * float(sqrt(3.0f)) / 3, 0.0f,     // lower right corner
-        +0.0f, +0.5f * float(sqrt(3.0f)) * 2 / 3, 0.0f, // upper corner
-        -0.5f / 2, +0.5f * float(sqrt(3.0f)) / 6, 0.0f, // inner left
-        +0.5f / 2, +0.5f * float(sqrt(3.0f)) / 6, 0.0f, // inner right
-        +0.0f, -0.5f * float(sqrt(3.0f)) / 3, 0.0f,     // inner down
-    };
-    unsigned int indices[] = {
-        0, 3, 5, // lower left triangle
-        3, 2, 4, // lower right triangle
-        5, 4, 1  // upper triangle
-    };
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
-    glCompileShader(vertex_shader);
+    glViewport(0, 0, 800, 600);
 
-    auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
-    glCompileShader(fragment_shader);
+    Shader shader("shaders/default.vert", "shaders/default.frag");
+    VertexArray vao;
+    vao.bind();
 
-    auto shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-    
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
+    VertexBuffer vbo(vertices, sizeof(vertices));
+    ElementBuffer ebo(indices, sizeof(indices));
 
-    unsigned int VBO, VAO, EBO;
-    // make sure to generate vao before vbo ( ordering is important )
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    vao.link_vertex_buffer(vbo, 0);
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-                          (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    vao.unbind();
+    vbo.unbind();
+    ebo.unbind();
 
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shader_program);
-        glBindVertexArray(VAO);
-        /*glDrawArrays(GL_TRIANGLES, 0, 3);*/
+        shader.activate();
+        vao.bind();
+
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shader_program);
-
+    vao.delete_array();
+    vbo.delete_buffer();
+    ebo.delete_buffer();
+    shader.delete_shader();
+    
     glfwDestroyWindow(window);
     glfwTerminate();
-
     return 0;
 }
