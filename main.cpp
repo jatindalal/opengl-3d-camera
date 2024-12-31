@@ -66,8 +66,6 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    glViewport(0, 0, 800, 600);
-
     Shader shader("shaders/default.vert", "shaders/default.frag");
     VertexArray vao;
     vao.bind();
