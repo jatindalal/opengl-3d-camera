@@ -9,7 +9,8 @@ public:
     GLuint m_id;
     VertexArray();
 
-    void link_vertex_buffer(VertexBuffer& vbo, GLuint layout);
+    void link_attrib(VertexBuffer& vbo, GLuint layout, GLuint num_components,
+                     GLenum type, GLsizeiptr stride, void *offset);
     void bind();
     void unbind();
     void delete_array();

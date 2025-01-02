@@ -9,14 +9,15 @@
 #include <iostream>
 
 // Vertices coordinates
+// ccords, colors
 GLfloat vertices[] =
 {
-	-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
-	0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
-	0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
-	-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-	0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
-	0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
+	-0.5f,  -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f, 0.02f, // Lower left corner
+	 0.5f,  -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f, 0.02f, // Lower right corner
+	 0.0f,   0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 1.0f, 0.6f, 0.32f, // Upper corner
+	-0.25f,  0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.45f, 0.17f, // Inner left
+	 0.25f,  0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.45f, 0.17f, // Inner right
+	 0.0f,  -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f, 0.02f// Inner down
 };
 
 // Indices for vertices order
@@ -73,7 +74,9 @@ int main()
     VertexBuffer vbo(vertices, sizeof(vertices));
     ElementBuffer ebo(indices, sizeof(indices));
 
-    vao.link_vertex_buffer(vbo, 0);
+    vao.link_attrib(vbo, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+    vao.link_attrib(vbo, 1, 3, GL_FLOAT, 6 * sizeof(float),
+                    (void*)(3 * sizeof(float)));
 
     vao.unbind();
     vbo.unbind();
