@@ -12,4 +12,7 @@ public:
     void activate();
     void delete_shader();
     static std::string get_file_contents(const char* filename);
+
+private:
+    void compile_errors_check(unsigned int shader, const char* type);
 };
