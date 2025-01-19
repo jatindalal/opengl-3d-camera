@@ -1,7 +1,6 @@
-# OpenGL 3d
+# OpenGL
 
-A project to learn basics of opengl by rendering 3d graphics on the screen with 
-some camera movements enabled
+A project to learn basics of opengl by rendering traingles and other shapes
 
 ## Libraries Used
 - GLFW ( for the opengl context and GUI window management )
